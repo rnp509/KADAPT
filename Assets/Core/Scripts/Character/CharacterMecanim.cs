@@ -326,4 +326,5 @@ public class CharacterMecanim : MonoBehaviour
         return RunStatus.Running;
     }
     #endregion
+
 }

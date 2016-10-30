@@ -49,9 +49,8 @@ public class Group4BT : MonoBehaviour
 		Val<Vector3> stop1Pos = Val.V (() => _stop1.position);
 		Val<Vector3> stop2Pos = Val.V (() => _stop2.position);
 
-
-
-		return null;
+		//Func<bool> 
+				
 	}
 
 	protected Node ST_ApproachAndWait(Transform target)
