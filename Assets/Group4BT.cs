@@ -63,8 +63,10 @@ public class Group4BT : MonoBehaviour
 	protected Node ST_Follow(GameObject target)
 	{
 		Val<Vector3> position = Val.V (() => target.transform.position);
-		// Participant will follow the object for a set amount of time before losing interest
-		return new Sequence( participant.GetComponent<BehaviorMecanim> ().Node_GoToUpToRadius (position, 3.0f));
+		Val<Vector3> participantPos = Val.V (() => participant.transform.position);
+
+		Func<bool> nearFollow = () => (participantPos.Value - position.Value).magnitude <= followRadius;		
+		return new SequenceParallel( new LeafAssert(nearFollow), participant.GetComponent<BehaviorMecanim> ().Node_GoToUpToRadius (position, 3.0f), new LeafWait(500));
 	}
 			
 	/// Stop to speak with other agents
@@ -81,32 +83,37 @@ public class Group4BT : MonoBehaviour
 
 		// Check if participant is near the follow object
 		Func<bool> nearFollow = () => (participantPos.Value - followPos.Value).magnitude <= followRadius;
+		Func<bool> notNearFollow = () => (participantPos.Value - followPos.Value).magnitude > followRadius;
 		// Check if the participant is near the car
 		Func<bool> nearCar = () => (participantPos.Value - avoidPos.Value).magnitude <= avoidRadius;
+		Func<bool> notNearCar = () => (participantPos.Value - avoidPos.Value).magnitude > avoidRadius;
 
 		// Roam between specified control points
 		Node roaming = new DecoratorLoop (
-			               new SequenceShuffle (
-				               this.ST_ApproachAndWait (this.wander1),
-				               this.ST_ApproachAndWait (this.wander2)));
-				
+			               new Sequence (
+				               new LeafAssert (notNearCar), 
+				               new LeafAssert (notNearFollow),
+				               new SequenceShuffle (
+					               new SequenceParallel (new LeafAssert (notNearCar), new LeafAssert (notNearFollow), this.ST_ApproachAndWait (this.wander1),
+					               new SequenceParallel (new LeafAssert (notNearCar), new LeafAssert (notNearFollow), this.ST_ApproachAndWait (this.wander2))))));
+								
 		// Follow a designated object
 		Node followTrigger = new DecoratorLoop (new LeafAssert (nearFollow));
-		Node follow = new DecoratorLoop (
-			              new SequenceParallel (
-				              this.ST_Follow (targetToFollow),
-				              followTrigger));
+		Node follow = new DecoratorLoop (new SequenceParallel (this.ST_Follow (targetToFollow), followTrigger));
 
 		// Look for incoming traffic
 		Node lookAtTrigger = new DecoratorLoop (new LeafAssert(nearCar));
 		Node lookAtCar = new DecoratorLoop (
-			                 new SequenceParallel (this.ST_WatchForTraffic (stop1, stop2, targetToAvoid)));
+			                 new Sequence (this.ST_WatchForTraffic (stop1, stop2, targetToAvoid)));
 
 
 		// Full BT
 		Node root = new DecoratorLoop (new DecoratorForceStatus (
 			RunStatus.Success, 
-			new Selector(lookAtCar))
+			new Selector(
+				new SequenceParallel(lookAtTrigger, lookAtCar),
+				new SequenceParallel(new LeafAssert(notNearCar), follow), 
+				new Sequence(new LeafAssert(notNearCar), new LeafAssert(notNearFollow), roaming)))
 		);
 		return root;
 	}

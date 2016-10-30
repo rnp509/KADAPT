@@ -4,6 +4,7 @@ using System.Collections;
 public class FreeLookCamera : MonoBehaviour
 {
 	public float min_x, max_x; // Camera bound in x
+	public float min_y, max_y;
 	public float min_z, max_z; // Camera bound in z
 	public bool canMove = true;
 
@@ -53,6 +54,8 @@ public class FreeLookCamera : MonoBehaviour
 			transform.Translate (p);
 			newPosition.x = Mathf.Clamp (transform.position.x, min_x, max_x);
 			newPosition.z = Mathf.Clamp (transform.position.z, min_z, max_z);
+			newPosition.y = Mathf.Clamp (transform.position.y, min_y, max_y);
+		
 			transform.position = newPosition;
 		}
     }
@@ -76,6 +79,14 @@ public class FreeLookCamera : MonoBehaviour
         {
             p_Velocity += new Vector3(1, 0, 0);
         }
+		if (Input.GetKeyDown(KeyCode.Space) )
+		{
+			p_Velocity += new Vector3 (0, 1, 0);
+		}
+		if (Input.GetKeyDown (KeyCode.LeftControl)) 
+		{
+			p_Velocity += new Vector3 (0, -1, 0);
+		}
         return p_Velocity;
     }
 }
