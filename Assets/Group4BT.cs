@@ -44,13 +44,13 @@ public class Group4BT : MonoBehaviour
 	}
 
 	// If approaching a road, agent stops and looks at both sides before proceeding
-	protected Node ST_WatchForTraffic(Transform _stop1, Transform _stop2)
+	protected Node ST_WatchForTraffic(Transform _stop1, Transform _stop2, GameObject car)
 	{
 		Val<Vector3> stop1Pos = Val.V (() => _stop1.position);
 		Val<Vector3> stop2Pos = Val.V (() => _stop2.position);
 
-		//Func<bool> 
-				
+		Val<Vector3> carPos = Val.V (() => car.transform.position);
+		return new Sequence (participant.GetComponent<BehaviorMecanim> ().Node_HeadLook (carPos));				
 	}
 
 	protected Node ST_ApproachAndWait(Transform target)
@@ -75,33 +75,38 @@ public class Group4BT : MonoBehaviour
 
 	protected Node BuildTreeRoot()
 	{
-		Val<Vector3> followPos = Val.V (() => targetToFollow.transform.position);
+		Val<Vector3> followPos = Val.V (() => targetToFollow.transform.position);		
 		Val<Vector3> avoidPos = Val.V (() => targetToAvoid.transform.position);
-		Val<Vector3> participantPos = Val.V (() => participant.transform.position);
-		//Func<bool> act = () => ((targetPos.Value - this.transform.position).magnitude <= followRadius); 	// Check if leader is within the designated follow radius
+		Val<Vector3> participantPos = Val.V (() => participant.transform.position);		
 
 		// Check if participant is near the follow object
 		Func<bool> nearFollow = () => (participantPos.Value - followPos.Value).magnitude <= followRadius;
 		// Check if the participant is near the car
 		Func<bool> nearCar = () => (participantPos.Value - avoidPos.Value).magnitude <= avoidRadius;
 
+		// Roam between specified control points
 		Node roaming = new DecoratorLoop (
 			               new SequenceShuffle (
 				               this.ST_ApproachAndWait (this.wander1),
 				               this.ST_ApproachAndWait (this.wander2)));
 				
-
+		// Follow a designated object
 		Node followTrigger = new DecoratorLoop (new LeafAssert (nearFollow));
 		Node follow = new DecoratorLoop (
 			              new SequenceParallel (
 				              this.ST_Follow (targetToFollow),
 				              followTrigger));
 
+		// Look for incoming traffic
+		Node lookAtTrigger = new DecoratorLoop (new LeafAssert(nearCar));
+		Node lookAtCar = new DecoratorLoop (
+			                 new SequenceParallel (this.ST_WatchForTraffic (stop1, stop2, targetToAvoid)));
 
 
+		// Full BT
 		Node root = new DecoratorLoop (new DecoratorForceStatus (
 			RunStatus.Success, 
-			new Selector(follow, roaming))
+			new Selector(lookAtCar))
 		);
 		return root;
 	}
