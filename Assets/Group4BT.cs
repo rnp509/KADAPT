@@ -88,6 +88,7 @@ public class Group4BT : MonoBehaviour
 		Func<bool> nearCar = () => (participantPos.Value - avoidPos.Value).magnitude <= avoidRadius;
 		Func<bool> notNearCar = () => (participantPos.Value - avoidPos.Value).magnitude > avoidRadius;
 
+		/*
 		// Roam between specified control points
 		Node roaming = new DecoratorLoop (
 			               new Sequence (
@@ -96,7 +97,14 @@ public class Group4BT : MonoBehaviour
 				               new SequenceShuffle (
 					               new SequenceParallel (new LeafAssert (notNearCar), new LeafAssert (notNearFollow), this.ST_ApproachAndWait (this.wander1),
 					               new SequenceParallel (new LeafAssert (notNearCar), new LeafAssert (notNearFollow), this.ST_ApproachAndWait (this.wander2))))));
-								
+
+		*/
+
+		Node roaming = new DecoratorLoop (
+			               new Sequence (
+				               this.ST_ApproachAndWait (this.wander1),
+				               this.ST_ApproachAndWait (this.wander2)));
+
 		// Follow a designated object
 		Node followTrigger = new DecoratorLoop (new LeafAssert (nearFollow));
 		Node follow = new DecoratorLoop (new SequenceParallel (this.ST_Follow (targetToFollow), followTrigger));
@@ -111,9 +119,9 @@ public class Group4BT : MonoBehaviour
 		Node root = new DecoratorLoop (new DecoratorForceStatus (
 			RunStatus.Success, 
 			new Selector(
+				new SequenceParallel(new LeafAssert(notNearCar), new LeafAssert(notNearFollow), roaming),
 				new SequenceParallel(lookAtTrigger, lookAtCar),
-				new SequenceParallel(new LeafAssert(notNearCar), follow), 
-				new Sequence(new LeafAssert(notNearCar), new LeafAssert(notNearFollow), roaming)))
+				new SequenceParallel(followTrigger, follow)))
 		);
 		return root;
 	}
