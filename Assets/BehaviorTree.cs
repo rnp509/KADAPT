@@ -7,7 +7,10 @@ public class BehaviorTree : MonoBehaviour
 {
     public Transform point1;
     public Transform point2;
-    public GameObject participant;
+    public Transform point3;
+    public GameObject Explorer;
+    public GameObject Sage;
+
 
     private BehaviorAgent bAgent;
     // Use this for initialization
@@ -24,18 +27,23 @@ public class BehaviorTree : MonoBehaviour
 
     }
 
-    protected Node ST_ApproachAndWait(Transform target)
+    protected Node ST_ApproachAndWait(Transform target, GameObject character)
     {
         Val<Vector3> position = Val.V(() => target.position);
-        return new Sequence(participant.GetComponent<BehaviorMecanim>().Node_GoTo(position), new LeafWait(1000));
+        return new Sequence(character.GetComponent<BehaviorMecanim>().Node_GoTo(position), new LeafWait(1000));
     }
+
+    //protected Node ST_SitDown(GameObject character)
+    //{
+      //  return new Sequence(character.GetComponent<BehaviorMecanim>().Node)
+    //}
 
     protected Node BuildTreeRoot()
     {
         Node roaming = new DecoratorLoop(
                         new SequenceShuffle(
-                        this.ST_ApproachAndWait(this.point1),
-                        this.ST_ApproachAndWait(this.point2)));
+                        this.ST_ApproachAndWait(this.point1, Explorer),
+                        this.ST_ApproachAndWait(this.point2, Explorer)));
         return roaming;
     }
 }
