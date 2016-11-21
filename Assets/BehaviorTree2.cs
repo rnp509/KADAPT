@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using TreeSharpPlus;
 
-public class BehaviorTree : MonoBehaviour
+public class BehaviorTree2 : MonoBehaviour
 {
     private bool collidedwithc1 = false;
     private bool collidedwithc2 = false;
@@ -15,8 +15,6 @@ public class BehaviorTree : MonoBehaviour
     public GameObject Sage;
     public GameObject Chaser1;
     public GameObject Chaser2;
-    private System.Random rnd;
-    private int rn;
 
 
     private BehaviorAgent bAgent;
@@ -53,13 +51,6 @@ public class BehaviorTree : MonoBehaviour
         return new Sequence(character.GetComponent<BehaviorMecanim>().Node_GoTo(position), new LeafWait(1000));
     }
 
-    protected Node ST_Follow(GameObject char1, GameObject char2)
-    {
-        Vector3 pos = new Vector3 (char2.transform.position.x, char2.transform.position.y, char2.transform.position.z + 2.0f);
-        Val<Vector3> position = Val.V(() => pos);
-        return new Sequence(char1.GetComponent<BehaviorMecanim>().Node_GoTo(position), new LeafWait(1000));
-    }
-
     protected Node ST_Chase1(GameObject e, GameObject c)
     {
         Vector3 pos = new Vector3(e.transform.position.x, e.transform.position.y, e.transform.position.z);
@@ -84,25 +75,13 @@ public class BehaviorTree : MonoBehaviour
 
     protected Node BuildTreeRoot()
     {
-        rnd = new System.Random();
-        rn = rnd.Next(1, 3);
         
-        if (rn == 2)
-        {
-            Node roaming = new DecoratorLoop(new Sequence(this.ST_ApproachAndWait(this.point2, Explorer)));
-            Node chase1 = new DecoratorLoop(new Sequence(this.ST_Chase1(Explorer, Chaser1)));
-            Node chase2 = new DecoratorLoop(new Sequence(this.ST_Chase2(Explorer, Chaser2)));
-            Node rightPath = new DecoratorLoop(new Sequence(roaming, new SequenceParallel(chase1, chase2)));
-            return rightPath;
-        }
-        else if (rn == 1)
-        {
-            Node roaming = new DecoratorLoop(new Sequence(this.ST_ApproachAndWait(this.point1, Explorer)));
-            Node roaming2 = new DecoratorLoop(new SequenceShuffle(this.ST_ApproachAndWait(this.point3, Sage)));
-            Node follow = new DecoratorLoop(new Sequence(this.ST_Follow(Explorer, Sage)));
-            Node leftPath = new DecoratorLoop(new Sequence(roaming, new SequenceParallel(roaming2,follow)));
-            return leftPath;
-        }
-        else { return null;}
+        Node chase1 = new DecoratorLoop(new Sequence(this.ST_Chase1(Explorer, Chaser1)));
+        Node chase2 = new DecoratorLoop(new Sequence(this.ST_Chase2(Explorer, Chaser2)));
+        Node rightPath = new DecoratorLoop(new Sequence(new SequenceParallel(chase1, chase2)));
+        
+        Node roaming = new DecoratorLoop(new SequenceShuffle(this.ST_ApproachAndWait(this.point3, Sage)));
+        Node leftPath = new DecoratorLoop(new Sequence(roaming));
+        return leftPath;
     }
 }
