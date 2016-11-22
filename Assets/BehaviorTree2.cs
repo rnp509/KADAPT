@@ -32,7 +32,7 @@ public class BehaviorTree2 : MonoBehaviour
 
     }
 
-    void OnCollisionEnter(Collision C)
+    void OnTriggerEnter(Collider C)
     {
         if (C.gameObject.name == "Chaser1")
         {
@@ -75,13 +75,10 @@ public class BehaviorTree2 : MonoBehaviour
 
     protected Node BuildTreeRoot()
     {
-        
+        Node roaming = new DecoratorLoop(new Sequence(this.ST_ApproachAndWait(this.point3, Sage)));
         Node chase1 = new DecoratorLoop(new Sequence(this.ST_Chase1(Explorer, Chaser1)));
         Node chase2 = new DecoratorLoop(new Sequence(this.ST_Chase2(Explorer, Chaser2)));
-        Node rightPath = new DecoratorLoop(new Sequence(new SequenceParallel(chase1, chase2)));
-        
-        Node roaming = new DecoratorLoop(new SequenceShuffle(this.ST_ApproachAndWait(this.point3, Sage)));
-        Node leftPath = new DecoratorLoop(new Sequence(roaming));
-        return leftPath;
+
+        return roaming;
     }
 }

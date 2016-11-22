@@ -15,6 +15,7 @@ public class BehaviorTree : MonoBehaviour
     public GameObject Sage;
     public GameObject Chaser1;
     public GameObject Chaser2;
+    public GameObject Chest;
     private System.Random rnd;
     private int rn;
 
@@ -34,7 +35,7 @@ public class BehaviorTree : MonoBehaviour
 
     }
 
-    void OnCollisionEnter(Collision C)
+    void OnTriggerEnter(Collider C)
     {
         if (C.gameObject.name == "Chaser1")
         {
@@ -55,7 +56,7 @@ public class BehaviorTree : MonoBehaviour
 
     protected Node ST_Follow(GameObject char1, GameObject char2)
     {
-        Vector3 pos = new Vector3 (char2.transform.position.x, char2.transform.position.y, char2.transform.position.z + 2.0f);
+        Vector3 pos = new Vector3 (char2.transform.position.x + 2.0f, char2.transform.position.y, char2.transform.position.z + 1.0f);
         Val<Vector3> position = Val.V(() => pos);
         return new Sequence(char1.GetComponent<BehaviorMecanim>().Node_GoTo(position), new LeafWait(1000));
     }
@@ -95,14 +96,13 @@ public class BehaviorTree : MonoBehaviour
             Node rightPath = new DecoratorLoop(new Sequence(roaming, new SequenceParallel(chase1, chase2)));
             return rightPath;
         }
-        else if (rn == 1)
+        else
         {
-            Node roaming = new DecoratorLoop(new Sequence(this.ST_ApproachAndWait(this.point1, Explorer)));
-            Node roaming2 = new DecoratorLoop(new SequenceShuffle(this.ST_ApproachAndWait(this.point3, Sage)));
-            Node follow = new DecoratorLoop(new Sequence(this.ST_Follow(Explorer, Sage)));
-            Node leftPath = new DecoratorLoop(new Sequence(roaming, new SequenceParallel(roaming2,follow)));
+            Node roaming = this.ST_ApproachAndWait(this.point1, Explorer);
+            Node roaming2 = this.ST_ApproachAndWait(this.point3, Sage);
+            Node follow = this.ST_Follow(Explorer,Chest);
+            Node leftPath = new Sequence(roaming, new SequenceParallel(roaming2, follow));
             return leftPath;
         }
-        else { return null;}
     }
 }
