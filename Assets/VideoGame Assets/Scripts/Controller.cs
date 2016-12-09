@@ -4,7 +4,7 @@ using System.Collections;
 
 public class Controller : MonoBehaviour
 {
-    
+    public Text WinText;
     private bool GemCollected = false;
 
     void Start()
@@ -19,5 +19,23 @@ public class Controller : MonoBehaviour
                 other.gameObject.SetActive(false);
             }
     }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.CompareTag("Desk"))
+            {
+                if (GemCollected)
+                {
+                    winGame();
+                }
+            }
+    }
+
+    void winGame()
+    {
+        WinText.text = "Success!";
+        Time.timeScale = 0;
+    }
+
 
 }
