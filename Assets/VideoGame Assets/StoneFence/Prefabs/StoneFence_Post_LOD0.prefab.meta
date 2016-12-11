@@ -1,7 +1,11 @@
 fileFormatVersion: 2
-guid: 7c8ef6ae49b645e47bea5b2b548e6561
-timeCreated: 1481479053
-licenseType: Free
+guid: f63e675fe3b6b9646beb49d9dd3e30ba
+labels:
+- Stone
+- Fence
+- Wall
+- Post
+- Pillar
 NativeFormatImporter:
   userData: 
   assetBundleName: 
