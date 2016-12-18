@@ -13,4 +13,9 @@ public class ButtonControl : MonoBehaviour {
     {
         SceneManager.LoadScene("VideoGame");
     }
+
+    public void restart()
+    {
+        SceneManager.LoadScene("BeginGame");
+    }
 }

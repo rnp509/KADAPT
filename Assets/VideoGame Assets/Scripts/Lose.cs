@@ -10,6 +10,5 @@ public class Lose : MonoBehaviour
     void Start()
     {
         LoseText.text = "Failure";
-        Time.timeScale = 0;
     }
 }

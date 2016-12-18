@@ -10,6 +10,5 @@ public class Win : MonoBehaviour {
 	void Start ()
     {
         WinText.text = "Success!";
-        Time.timeScale = 0;
     }
 }
