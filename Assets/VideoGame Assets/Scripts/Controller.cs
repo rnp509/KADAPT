@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class Controller : MonoBehaviour
 {
     public Text WinText;
+    public Text LoseText;
     private bool GemCollected = false;
     private bool Key1Collected = false;
     private bool Key2Collected = false;
@@ -17,10 +19,10 @@ public class Controller : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Gem"))
-            {
-                GemCollected = true;
-                other.gameObject.SetActive(false);
-            }
+        {
+            GemCollected = true;
+            other.gameObject.SetActive(false);
+        }
 
         if (other.gameObject.CompareTag("Key1"))
         {
@@ -47,9 +49,14 @@ public class Controller : MonoBehaviour
             {
                 if (GemCollected)
                 {
-                    winGame();
+                    SceneManager.LoadScene("WinGame");
                 }
             }
+
+        if (other.gameObject.CompareTag("Guard"))
+        {
+            SceneManager.LoadScene("LoseGame");
+        }
 
         if (other.gameObject.CompareTag("Vault"))
         {
@@ -58,12 +65,6 @@ public class Controller : MonoBehaviour
                 other.gameObject.SetActive(false);
             }
         }
-    }
-
-    void winGame()
-    {
-        WinText.text = "Success!";
-        Time.timeScale = 0;
     }
 
 
